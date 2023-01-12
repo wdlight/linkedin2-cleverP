@@ -1,13 +1,21 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+:root,  /* :root선택자는 웹 문서 구조에서 가장 상위 요소를 선택할 때 사용함 */
+body,
+html {
+  background-color: #f5f5f5;
+  box-sizing: border-box;
 }
+
+h1,h2,h3,h4,h5,h6, header, html, i , img, lavel, li, nav, p, span, small, ul {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  font-size: 100%;
+  vertical-align: transparent;
+}
+
