@@ -1,15 +1,34 @@
-import React from 'react'
+import React, {useState} from 'react'
 import styled from 'styled-components';
-
+import PostModal from './PostModal';
 
 export default function Main() {
-  return (
-  
+  const [showModal, setShowModal] = useState("close");
+
+  const handleClick = (e) => {    
+    e.preventDefault();
+    if ( e.target !== e.currentTarget) {
+      return;
+    }
+    switch ( showModal ) {
+      case "open":
+        setShowModal("close");
+        break;
+      case "close":
+        setShowModal( "open");
+        break;
+      default:
+        setShowModal("close");
+    }
+    console.log( "Main click write a post:" + showModal );
+
+  }
+  return (  
     <Container>
       <Sharebox>
         <div>
           <img src="/images/user.svg" alt="" />
-          <button>Start a post</button>
+          <button onClick={handleClick}>Start a post</button>
         </div>
         <div>
           <button>
@@ -94,7 +113,9 @@ export default function Main() {
           </SocialActions>
           
         </Article>
+
       </div>
+      <PostModal showModal={showModal} handleClick={handleClick}></PostModal>
 
     </Container>
   
@@ -191,13 +212,14 @@ const Article = styled( CommonCard) `
 `;
 
 const SharedActor = styled.div`
-  padding-right:  48px;
+  padding-right: 48px;
   flex-wrap: nowrap;
   padding: 12px 16px 0;
   margin-bottom: 8px;
   align-items: center;
   display: flex;
-  a {
+
+  a{
     margin-right: 12px;
     flex-grow: 1;
     overflow: hidden;
@@ -236,7 +258,8 @@ const SharedActor = styled.div`
       border: none;
       outline: none;
     }
-  }`;
+  }
+  `;
 
 
 const Description = styled.div`
@@ -308,3 +331,4 @@ const SocialActions = styled.div`
 
   }
 `;
+

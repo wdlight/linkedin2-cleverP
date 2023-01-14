@@ -1,17 +1,115 @@
 import styled from 'styled-components';
+import React, { useEffect,useState } from 'react';
+// import { signInAPI } from '../actions/index'
+import { auth, provider, signInWithPopup } from '../firebase.js';
+import { useSelector, useDispatch } from "react-redux";
+import { login, logout, setUser, selectUser } from "../reducers/userReducer";
+import { Navigate } from "react-router-dom";
 
-import { connect } from "react-redux";
-
-// import { useDispatch } from 'react-redux';
-// import { useSelector } from 'react-redux';
-
+import { signInAPI, signOutAPI, getUserAPI } from "../actions/fbauth.js"
 
 const Login = (props) => {
+// Login 처리 
+// user 가 있으면 설정하고, /Home 으로 redirect한다.
+  //const user = useSelector( selectUser );
   // const dispatch = useDispatch();
-  // const userReducer = useSelector((state) => state.user);
+  // console.log ( "Login.js >> user is :" + user );
+
+  // useEffect ( () => {
+  //   auth.onAuthStateChanged( (userAuth) => {
+  //     if (userAuth) {
+  //       // user is loggined in
+  //       dispatch( login ( {
+  //         email : userAuth.email,
+  //         uid: userAuth.uid,
+  //         displayName: userAuth.displayName,
+  //         photoUrl: userAuth.photoURL,
+  //       }));
+        
+  //     } else {
+  //       //user is logged out        
+  //       dispatch( logout());
+  //       console.log("useEffect: user-log out")
+  //     }
+  //   });
+  // }, null);
+  // function getUserAPI () {
+  //   return () =>{
+  //     auth.onAuthStateChanged( async (userAuth) => {
+  //       if (userAuth) {
+  //         // user is loggined in
+  //         dispatch( setUser( userAuth) );    
+  //         console.log("useEffect: user-log in")  
+  //       } else {
+  //         //user is logged out        
+  //         dispatch( logout());      
+  //         console.log("useEffect: user-log out")
+  //       }
+        
+  //     });
+  //   } 
+  // }
+  // useEffect ( () =>{
+  //   getUserAPI();
+  // }, [])
+
+  const user = useSelector( selectUser );
+
+  const [ logon , setLogon] = useState(false); 
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {       
+      setLogon( !logon );      
+      console.log ( "useEffect>>" + user )
+    });
+  }, [user] )
+
+  // SignIn Button click handler function
+  // const handleAuth = (e) => fb_signIn();    
+  // const fb_signIn = () => {
+  //   auth.signInWithPopup(provider)
+  //   .then( (result) => {
+  //     // user sign in 이 완료된 상황.
+  //     // set user를 해야 한다.
+  //     console.log("calling login" + result );
+  //     dispatch( login( result.user) );
+  //   })
+  //   .catch( (error) => {alert(error.message );});
+  // }
+  
+  const dispatch = useDispatch();
+  function signInAPI() {
+    
+      console.log ( "signIn API32" + auth) ;
+      auth  
+        .signInWithPopup(provider)      
+        .then (( payload ) => {
+          console.log("signInAPI called:" );
+          console.log( payload.user);
+          dispatch( login( payload.user))
+          //dispatch( login( JSON.stringify (payload.user)))
+          setLogon(true);
+        })
+        .catch( (error) => alert( error.message));
+    
+  }
+  
+
+  function handleAuth() {
+    console.log( "Login.js >> handleAuth() ")
+    // auth  
+    //   .signInWithPopup(provider)      
+    //   .then (( payload ) => {
+    //     console.log("signInAPI called:" + payload);
+    //     dispatch( login( payload.user))
+    //   })
+    //   .catch( (error) => alert( error.message));
+
+    signInAPI();  
+  }
 
   return (
       <Container>
+        { user && <Navigate to ="/home" /> }
         <Nav>
           <a href="/">
             <img src="/images/login-logo.svg" alt="" />
@@ -28,7 +126,9 @@ const Login = (props) => {
 
           </Hero>
           <Form>
-            <Google>
+            {/* <Google onClick={()=>props.signIn()}> */}
+            <Google onClick={ handleAuth }>
+            
               <img src="/images/google.svg" alt="" />Sign in with Google
             </Google>
           </Form>
@@ -179,5 +279,7 @@ const Google = styled.button`
 export default Login;
 
 // const mapStateToProps = (state) => (return {});
-// const mapDispatchToProps = (dispatch) => ({});
+// const mapDispatchToProps = (dispatch) => ({
+//   signIn : () => dispatchEvent(signInAPI()), 
+// });
 // export default connect( mapStateToProps, mapDispatchToProps) (Login);

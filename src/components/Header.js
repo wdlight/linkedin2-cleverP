@@ -2,9 +2,31 @@ import React from 'react'
 import styled from 'styled-components';
 
 
+import { useDispatch } from "react-redux";
+import { login, logout, selectUser } from "../reducers/userReducer"
+import { useSelector } from "react-redux";
+import { auth } from "../firebase"
+import { Navigate } from "react-router-dom";
+
 function Header() {
+
+  const user = useSelector( selectUser );
+  const dispatch = useDispatch();
+  const signOut = () => {
+    
+    auth.signOut()
+    .then ( ()=> {
+      dispatch( logout() );
+      console.log( "Header.js >> dispatching Logout")
+    })
+    .catch( error => console.log( error) )
+    
+  }
+
   return (    
+    
     <Container>
+      { !user && <Navigate to ="/" /> }
       <Content>
         <Logo>
           <a href="/home">
@@ -52,17 +74,24 @@ function Header() {
             <NavItem>
               <a>
                 <img src="/images/nav-notifications.svg" alt="" />
-                <span>NOtification</span>
+                <span>Notification</span>
               </a>              
             </NavItem>
 
             <User>
               <a>
-                <img src="/images/user.svg" alt="" />
+                {user && user.photoURL ? (
+                  <img src={user.photoURL} alt="" />
+                )
+                :
+                (
+                  <img src="/images/user.svg" alt="" />
+                )
+                }                
                 <span>Me</span>
                 <img src="/images/down-icon.svg" alt="" />
               </a>
-              <SignOut><a>Sign Out</a></SignOut>
+              <SignOut onClick={signOut}>Sign Out</SignOut>
             </User>
 
             <Work>
@@ -229,13 +258,14 @@ const SignOut = styled.div`
   transition-duration: 167ms;
   text-align: center;
   display: none;
+  cursor: pointer;
 
-  /* a:hover{
+  :hover{
     align-items: center;
     display: flex;
     justify-content: center;
     display: initial;
-  } */
+  } 
 
 `;
 

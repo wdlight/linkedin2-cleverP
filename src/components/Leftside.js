@@ -1,8 +1,15 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// User login setting.
+import { useSelector } from "react-redux"
+import { selectUser } from "../reducers/userReducer"
 
 export default function Leftside() {
+
+  const user = useSelector ( selectUser );
+
+  console.log ( "LeftSide -- user :" + user )
   return (
     <Container>
       <ArtCard>
@@ -10,7 +17,7 @@ export default function Leftside() {
           <CardBackground/>
           <a>
             <Photo></Photo>
-            <Link>Welcome, there!</Link>
+            <Link>Welcome, there! --{ user && user.displayName}</Link>
           </a>
           <a>
             <AddPhotoText>Add a photo</AddPhotoText>
