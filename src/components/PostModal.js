@@ -2,8 +2,12 @@ import React, {useState} from 'react'
 import styled from 'styled-components';
 import ReactPlayer from "react-player";
 
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { selectUser } from "../reducers/userReducer"
+import { db, storage, firebaseApp } from '../firebase';
+import firebase from 'firebase/compat/app';
+
+import { setLoading } from '../reducers/articleReducer';
 
 function PostModal(props) {
   const [editorText, setEditorText] = useState("");
@@ -37,6 +41,88 @@ function PostModal(props) {
     props.handleClick(e);
   }
   console.log ( "Modal" + props.showModal);
+
+  // Post Image to firebase
+  const dispatch = useDispatch();
+  function postArticleAPI(payload) {
+    
+      console.log ( "postArticle" ) ;
+      
+      dispatch( setLoading(true) );
+
+      if ( payload.image !== "" ){
+        // image uploading..
+        const upload = 
+          storage
+          .ref(`images/${payload.image.name}`)
+          .put(payload.image);
+        upload.on(
+          "state_changed",
+          // 2nd param : 변화 시에 동작하는 함수
+          (snapshot) =>{
+            const progress = 
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log( `Progress: ${progress}%`);
+            if ( snapshot.state =="RUNNING"){
+              console.log(`Progress: ${progress}%`)
+            }
+          },
+          // 3rd Error
+          (error) => console.log( error.code),
+          // 4th param. 성공시에 동작함수.
+          async () => {
+            const downloadURL = await upload.snapshot.ref.getDownloadURL();
+            db.collection("articles").add ( {
+              actor: {
+                description: payload.user.email,
+                title: payload.user.displayName,
+                date: payload.timestamp,
+                image: payload.user.photoURL,
+              },
+              video: payload.video,
+              shareImg: downloadURL,
+              comments: 0,
+              description: payload.description
+            });
+            dispatch  ( setLoading(false));
+    
+          }
+        )
+      } else if ( payload.video){
+        db.collection("articles").add ( {
+          actor: {
+            description: payload.user.email,
+            title: payload.user.displayName,
+            date: payload.timestamp,
+            image: payload.user.photoURL,
+          },
+          video: payload.video,
+          shareImg: "",
+          comments: 0,
+          description: payload.description
+        });
+        dispatch  ( setLoading(false));
+      }
+
+      
+     
+  }
+
+  const postArticle = e =>{
+    e.preventDefault();
+    if ( e.target !== e.currentTarget)
+      return;
+    const payload = {
+      image: shareImage,
+      video: videoLink,
+      user: user,
+      description: editorText,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    postArticleAPI( payload);
+    reset(e);
+  }
 
   return (
     <>
@@ -114,7 +200,8 @@ function PostModal(props) {
             </AssetButton>
           </ShareComment>
 
-          <PostButton disabled= {!editorText ? true : false}>
+          <PostButton disabled= {!editorText ? true : false}
+            onClick={ (e) => postArticle(e)}>
             Post
           </PostButton>
         </SharedCreate>
